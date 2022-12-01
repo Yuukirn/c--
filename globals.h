@@ -31,6 +31,7 @@ typedef enum
     ENDFILE,
     ERROR,
     /* reserved words */
+    // 保留字
     IF,
     THEN,
     ELSE,
@@ -43,16 +44,17 @@ typedef enum
     ID,
     NUM,
     /* special symbols */
-    ASSIGN,
-    EQ,
-    LT,
-    PLUS,
-    MINUS,
-    TIMES,
-    OVER,
-    LPAREN,
-    RPAREN,
-    SEMI
+    // 特殊符号
+    ASSIGN, // :=
+    EQ, // =
+    LT, // <
+    PLUS, // +
+    MINUS, // -
+    TIMES, // *
+    OVER, // /
+    LPAREN, // (
+    RPAREN, // )
+    SEMI // ;
 } TokenType;
 
 extern FILE *source;  /* source code text file */
@@ -68,9 +70,9 @@ extern int lineno; /* source line number for listing */
 
 typedef enum
 {
-    StmtK,
-    ExpK
-} NodeKind;
+    StmtK, // 语句
+    ExpK // 表达式
+} NodeKind; // 构建语法树时标识类型
 typedef enum
 {
     IfK,
@@ -78,7 +80,7 @@ typedef enum
     AssignK,
     ReadK,
     WriteK
-} StmtKind;
+} StmtKind; // 语句类型
 // 用于表达式类型检查
 typedef enum
 {
@@ -105,8 +107,8 @@ typedef struct treeNode
     NodeKind nodekind;
     union
     {
-        StmtKind stmt;
-        ExpKind exp;
+        StmtKind stmt; // nodekind -> StmtK
+        ExpKind exp; // nodekind -> ExpK
     } kind;
     union
     {

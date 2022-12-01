@@ -13,14 +13,16 @@
 typedef enum
 {
     START,
-    INASSIGN,
-    INCOMMENT,
-    INNUM,
-    INID,
+    INASSIGN, // START + : -> INASSIGN
+    INCOMMENT, // START + { -> INCOMMENT + } -> START
+    INNUM, // START + digit -> INNUM
+    INID, // START + letter -> INID
     DONE
 } StateType;
 
 /* lexeme of identifier or reserved word */
+// 标识符或保留字
+// 先将标识符或保留字保留在该数组中，然后再在保留字表中识别出保留字
 char tokenString[MAXTOKENLEN + 1];
 
 /* BUFLEN = length of the input buffer for
@@ -60,6 +62,7 @@ static int getNextChar(void)
 
 /* ungetNextChar backtracks one character
    in lineBuf */
+// 会退一个位置
 static void ungetNextChar(void)
 {
     if (!EOF_flag)
@@ -67,6 +70,7 @@ static void ungetNextChar(void)
 }
 
 /* lookup table of reserved words */
+// 保留字表
 static struct
 {
     char *str;
@@ -75,6 +79,7 @@ static struct
 
 /* lookup an identifier to see if it is a reserved word */
 /* uses linear search */
+// 检查是否是保留字，是的话返回保留字，否则返回 id
 static TokenType reservedLookup(char *s)
 {
     int i;
@@ -98,6 +103,7 @@ TokenType getToken(void)
     /* current state - always begins at START */
     StateType state = START;
     /* flag to indicate save to tokenString */
+    // 指示是否将一个字符增加到 tokenString 上（标识符或保留字）    标识符长度小于 40
     int save;
     while (state != DONE)
     {
@@ -119,7 +125,7 @@ TokenType getToken(void)
                 save = FALSE;
                 state = INCOMMENT;
             }
-            else
+            else // other
             {
                 state = DONE;
                 switch (c)
@@ -175,15 +181,15 @@ TokenType getToken(void)
             state = DONE;
             if (c == '=')
                 currentToken = ASSIGN;
-            else
+            else // : 后读取到的不是 = , 则返回 ERROR
             { /* backup in the input */
-                ungetNextChar();
+                ungetNextChar(); // 回退
                 save = FALSE;
                 currentToken = ERROR;
             }
             break;
         case INNUM:
-            if (!isdigit(c))
+            if (!isdigit(c)) // 读取到不是数字的字符后结束读取
             { /* backup in the input */
                 ungetNextChar();
                 save = FALSE;
@@ -192,7 +198,7 @@ TokenType getToken(void)
             }
             break;
         case INID:
-            if (!isalpha(c))
+            if (!isalpha(c)) // 读取到不是字母的字符后结束读取
             { /* backup in the input */
                 ungetNextChar();
                 save = FALSE;
@@ -208,6 +214,7 @@ TokenType getToken(void)
             break;
         }
         if ((save) && (tokenStringIndex <= MAXTOKENLEN))
+            // fprintf(listing, "save: %c\n", c);
             tokenString[tokenStringIndex++] = (char)c;
         if (state == DONE)
         {

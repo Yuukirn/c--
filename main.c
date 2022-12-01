@@ -31,17 +31,17 @@
 #endif
 
 /* allocate global variables */
-int lineno = 0;
-FILE *source;
-FILE *listing;
-FILE *code;
+int lineno = 0; //行号
+FILE *source; // *tny
+FILE *listing; // stdout
+FILE *code; // *.tm
 
 /* allocate and set tracing flags */
 int EchoSource = FALSE;
-int TraceScan = FALSE;
+int TraceScan = TRUE;
 int TraceParse = TRUE;
-int TraceAnalyze = FALSE;
-int TraceCode = FALSE;
+int TraceAnalyze = TRUE;
+int TraceCode = TRUE;
 
 int Error = FALSE;
 
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     while (getToken() != ENDFILE)
         ;
 #else
-    syntaxTree = parse();
+    syntaxTree = parse(); // 解析得到语法树
     if (TraceParse)
     {
         fprintf(listing, "\nSyntax tree:\n");
@@ -80,10 +80,10 @@ int main(int argc, char *argv[])
     {
         if (TraceAnalyze)
             fprintf(listing, "\nBuilding Symbol Table...\n");
-        buildSymtab(syntaxTree);
+        buildSymtab(syntaxTree); //根据语法树得到符号表
         if (TraceAnalyze)
             fprintf(listing, "\nChecking Types...\n");
-        typeCheck(syntaxTree);
+        typeCheck(syntaxTree); // 类型检查
         if (TraceAnalyze)
             fprintf(listing, "\nType Checking Finished\n");
     }
@@ -91,6 +91,9 @@ int main(int argc, char *argv[])
     if (!Error)
     {
         char *codefile;
+        // size_t strcspn(const char *str1, const char *str2)
+        // 检索 str1 开头连续有几个字符都不含 str2 中的字符
+        // 此处用于求后缀前的文件名的长度
         int fnlen = strcspn(pgm, ".");
         codefile = (char *)calloc(fnlen + 4, sizeof(char));
         strncpy(codefile, pgm, fnlen);
@@ -101,7 +104,7 @@ int main(int argc, char *argv[])
             printf("Unable to open %s\n", codefile);
             exit(1);
         }
-        codeGen(syntaxTree, codefile);
+        codeGen(syntaxTree, codefile); // 生成 .tm 文件
         fclose(code);
     }
 #endif
