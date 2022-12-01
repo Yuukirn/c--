@@ -32,6 +32,7 @@ static void syntaxError(char *message)
     Error = TRUE;
 }
 
+// 检查当前读取的 token 是否是 expected，是则继续读取下一个放入全局变量 token 中
 static void match(TokenType expected)
 {
     if (token == expected)
@@ -44,6 +45,9 @@ static void match(TokenType expected)
     }
 }
 
+// program -> stmt_sequence
+
+// stmt-sequence -> stmt-sequence `;` statement | statement
 TreeNode *stmt_sequence(void)
 {
     TreeNode *t = statement();
@@ -68,6 +72,7 @@ TreeNode *stmt_sequence(void)
     return t;
 }
 
+// statement -> if_stmt | repeat_stmt | assign-stmt | read-stmt | write-stmt
 TreeNode *statement(void)
 {
     TreeNode *t = NULL;
@@ -97,6 +102,8 @@ TreeNode *statement(void)
     return t;
 }
 
+// if-stmt -> `if` exp `then` stmt-sequence `end`
+//          | `if` exp `then` stmt-sequence `else` stmt-sequence `end`
 TreeNode *if_stmt(void)
 {
     TreeNode *t = newStmtNode(IfK);
@@ -116,6 +123,7 @@ TreeNode *if_stmt(void)
     return t;
 }
 
+// repeat-stmt -> `repeat` stmt-sequence `until` exp
 TreeNode *repeat_stmt(void)
 {
     TreeNode *t = newStmtNode(RepeatK);
@@ -128,6 +136,7 @@ TreeNode *repeat_stmt(void)
     return t;
 }
 
+// assign-stmt -> identifier := exp
 TreeNode *assign_stmt(void)
 {
     TreeNode *t = newStmtNode(AssignK);
@@ -140,6 +149,7 @@ TreeNode *assign_stmt(void)
     return t;
 }
 
+// read-stmt -> read identifier
 TreeNode *read_stmt(void)
 {
     TreeNode *t = newStmtNode(ReadK);
@@ -150,6 +160,7 @@ TreeNode *read_stmt(void)
     return t;
 }
 
+// write_stmt -> write exp
 TreeNode *write_stmt(void)
 {
     TreeNode *t = newStmtNode(WriteK);
@@ -159,6 +170,7 @@ TreeNode *write_stmt(void)
     return t;
 }
 
+// exp -> simple-exp comparison-op simple-exp | simple-exp      // comparison-op -> < | =
 TreeNode *exp(void)
 {
     TreeNode *t = simple_exp();
@@ -178,6 +190,7 @@ TreeNode *exp(void)
     return t;
 }
 
+// simple_exp -> simple-exp addop term | term       // addop -> + | -
 TreeNode *simple_exp(void)
 {
     TreeNode *t = term();
@@ -196,6 +209,7 @@ TreeNode *simple_exp(void)
     return t;
 }
 
+// term -> factor { mulop factor }      // mulop -> * | /
 TreeNode *term(void)
 {
     TreeNode *t = factor();
@@ -214,24 +228,25 @@ TreeNode *term(void)
     return t;
 }
 
+// factor -> (exp) | number | identifier
 TreeNode *factor(void)
 {
     TreeNode *t = NULL;
     switch (token)
     {
-    case NUM:
+    case NUM: // number
         t = newExpNode(ConstK);
         if ((t != NULL) && (token == NUM))
             t->attr.val = atoi(tokenString);
         match(NUM);
         break;
-    case ID:
+    case ID: // identifier
         t = newExpNode(IdK);
         if ((t != NULL) && (token == ID))
             t->attr.name = copyString(tokenString);
         match(ID);
         break;
-    case LPAREN:
+    case LPAREN: // (exp)
         match(LPAREN);
         t = exp();
         match(RPAREN);
