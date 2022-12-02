@@ -57,6 +57,12 @@ void printToken(TokenType token, const char *tokenString)
     case OVER:
         fprintf(listing, "/\n");
         break;
+    case LBRACE:
+        fprintf(listing, "{\n");
+        break;
+    case RBRACE:
+        fprintf(listing, "}\n");
+        break;
     case ENDFILE:
         fprintf(listing, "EOF\n");
         break;

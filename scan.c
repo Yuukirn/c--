@@ -14,7 +14,11 @@ typedef enum
 {
     START,
     INASSIGN, // START + : -> INASSIGN
-    INCOMMENT, // START + { -> INCOMMENT + } -> START
+    // 改成 START + "/" -> INCOMMENT1 + "*" -> INCOMMENT2 + "*" -> INCOMMENT3 + "/" -> INCOMMENT4
+    INCOMMENT1, // START + { -> INCOMMENT + } -> START
+    INCOMMENT2,
+    INCOMMENT3,
+    INCOMMENT4,
     INNUM, // START + digit -> INNUM
     INID, // START + letter -> INID
     DONE
@@ -120,10 +124,10 @@ TokenType getToken(void)
                 state = INASSIGN;
             else if ((c == ' ') || (c == '\t') || (c == '\n'))
                 save = FALSE;
-            else if (c == '{')
+            else if (c == '/')
             {
                 save = FALSE;
-                state = INCOMMENT;
+                state = INCOMMENT1;
             }
             else // other
             {
@@ -167,15 +171,38 @@ TokenType getToken(void)
                 }
             }
             break;
-        case INCOMMENT:
+        case INCOMMENT1:
             save = FALSE;
             if (c == EOF)
             {
                 state = DONE;
                 currentToken = ENDFILE;
             }
-            else if (c == '}')
+            else if (c == '*') {
+                state = INCOMMENT2;
+            } else { // INCOMMENT1 状态下没有接收到 / 则表示是除号
+                ungetNextChar();
+                currentToken = OVER;
+            }
+            break;
+        case INCOMMENT2: // 已接受 /* 应能循环接受其他字符
+            save = FALSE;
+            if (c == EOF) {
+                state = DONE;
+                currentToken = ENDFILE;
+            } else if (c == '*') {
+                state = INCOMMENT3;
+            }
+            break;
+        case INCOMMENT3:
+            save = FALSE;
+            if (c == '/') {
+                // fprintf(listing, "annotation over");
                 state = START;
+            } else {
+                ungetNextChar();
+                currentToken = ERROR;
+            }
             break;
         case INASSIGN:
             state = DONE;
@@ -228,5 +255,6 @@ TokenType getToken(void)
         fprintf(listing, "\t%d: ", lineno);
         printToken(currentToken, tokenString);
     }
+    // fprintf(listing, "get token: %s", currentToken);
     return currentToken;
 } /* end getToken */

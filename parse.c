@@ -270,6 +270,7 @@ TreeNode *parse(void)
 {
     TreeNode *t;
     token = getToken();
+    // program -> stmt_sequence
     t = stmt_sequence();
     if (token != ENDFILE)
         syntaxError("Code ends before file\n");

@@ -54,7 +54,9 @@ typedef enum
     OVER, // /
     LPAREN, // (
     RPAREN, // )
-    SEMI // ;
+    SEMI, // ;
+    LBRACE, // {
+    RBRACE, // }
 } TokenType;
 
 extern FILE *source;  /* source code text file */
