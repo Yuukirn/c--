@@ -20,6 +20,8 @@ void printToken( TokenType, const char* );
  */
 TreeNode * newStmtNode(StmtKind);
 
+TreeNode * newNullStmtNode();
+
 /* Function newExpNode creates a new expression 
  * node for syntax tree construction
  */

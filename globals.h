@@ -82,14 +82,21 @@ typedef enum
     StmtK, // 语句
     ExpK // 表达式
 } NodeKind; // 构建语法树时标识类型
+
+// TODO:
 typedef enum
 {
-    IfK,
-    RepeatK,
-    AssignK,
-    ReadK,
-    WriteK
+    SelectionK,
+    WhileK,
+    ExpressionK,
+    ReturnK,
+    CompoundK,
+    VarDeclarationK,
+    FuncDeclarationK,
+    ParamK,
 } StmtKind; // 语句类型
+
+// TODO:
 // 用于表达式类型检查
 typedef enum
 {
@@ -111,7 +118,7 @@ typedef enum
 typedef struct treeNode
 {
     struct treeNode *child[MAXCHILDREN];
-    struct treeNode *sibling;
+    struct treeNode *sibling; // 连接同一层次的节点的链表
     int lineno;
     NodeKind nodekind;
     union
