@@ -18,9 +18,13 @@ typedef enum
     INCOMMENT1, // START + { -> INCOMMENT + } -> START
     INCOMMENT2,
     INCOMMENT3,
-    INCOMMENT4,
+    INLE,
+    INRE,
+    INNE,
+    INEQ,
     INNUM, // START + digit -> INNUM
-    INID, // START + letter -> INID
+    INID,  // START + letter -> INID
+    INBLOCK,
     DONE
 } StateType;
 
@@ -79,7 +83,7 @@ static struct
 {
     char *str;
     TokenType tok;
-} reservedWords[MAXRESERVED] = {{"if", IF}, {"then", THEN}, {"else", ELSE}, {"end", END}, {"repeat", REPEAT}, {"until", UNTIL}, {"read", READ}, {"write", WRITE}};
+} reservedWords[MAXRESERVED] = {{"if", IF}, {"int", INT}, {"else", ELSE}, {"void", VOID}, {"while", WHILE}, {"return", RETURN}, {"read", READ}, {"write", WRITE}};
 
 /* lookup an identifier to see if it is a reserved word */
 /* uses linear search */
@@ -123,11 +127,33 @@ TokenType getToken(void)
             else if (c == ':')
                 state = INASSIGN;
             else if ((c == ' ') || (c == '\t') || (c == '\n'))
+            {
                 save = FALSE;
+            }
             else if (c == '/')
             {
                 save = FALSE;
                 state = INCOMMENT1;
+            }
+            else if (c == '<') // 进入 INLE，可能是 LE(<=)
+            {
+                save = FALSE;
+                state = INLE;
+            }
+            else if (c == '>')
+            {
+                save = FALSE;
+                state = INRE;
+            }
+            else if (c == '!')
+            {
+                save = FALSE;
+                state = INNE;
+            }
+            else if (c == '=')
+            {
+                save = FALSE;
+                state = INEQ;
             }
             else // other
             {
@@ -139,10 +165,13 @@ TokenType getToken(void)
                     currentToken = ENDFILE;
                     break;
                 case '=':
-                    currentToken = EQ;
+                    currentToken = ASSIGN; //
                     break;
                 case '<':
                     currentToken = LT;
+                    break;
+                case '>':
+                    currentToken = RT;
                     break;
                 case '+':
                     currentToken = PLUS;
@@ -162,13 +191,74 @@ TokenType getToken(void)
                 case ')':
                     currentToken = RPAREN;
                     break;
+                case '{':
+                    currentToken = LBRACE;
+                    break;
+                case '}':
+                    currentToken = RBRACE;
+                    break;
                 case ';':
                     currentToken = SEMI;
+                    break;
+                case ',':
+                    currentToken = COMMA;
                     break;
                 default:
                     currentToken = ERROR;
                     break;
                 }
+            }
+            break;
+        case INLE:
+            save = FALSE;
+            state = DONE; // INLE 状态下一定会返回 LE 或 LT
+            if (c == '=')
+            {
+                currentToken = LE;
+            }
+            else
+            { // < 后的下一个字符不是 = 表示是 LT(<)
+                currentToken = LT;
+                ungetNextChar(); // 回退
+            }
+            break;
+        case INRE:
+            save = FALSE;
+            state = DONE;
+            if (c == '=')
+            {
+                currentToken = RE;
+            }
+            else
+            {
+                currentToken = RT;
+                ungetNextChar();
+            }
+            break;
+        case INNE:
+            save = FALSE;
+            state = DONE;
+            if (c == '=')
+            {
+                currentToken = NE;
+            }
+            else // 只读取到 ！ 而没有 = ，返回 ERROR
+            {
+                currentToken = ERROR;
+                ungetNextChar();
+            }
+            break;
+        case INEQ:
+            save = FALSE;
+            state = DONE;
+            if (c == '=')
+            {
+                currentToken = EQ;
+            }
+            else
+            { // 只读取到 = 而没有第二个 =，返回 ASSIGN, 并回退
+                currentToken = ASSIGN;
+                ungetNextChar();
             }
             break;
         case INCOMMENT1:
@@ -178,46 +268,44 @@ TokenType getToken(void)
                 state = DONE;
                 currentToken = ENDFILE;
             }
-            else if (c == '*') {
+            else if (c == '*')
+            {
                 state = INCOMMENT2;
-            } else { // INCOMMENT1 状态下没有接收到 / 则表示是除号
+            }
+            else
+            { // INCOMMENT1 状态下没有接收到 / 则表示是除号
                 ungetNextChar();
                 currentToken = OVER;
             }
             break;
         case INCOMMENT2: // 已接受 /* 应能循环接受其他字符
             save = FALSE;
-            if (c == EOF) {
+            if (c == EOF)
+            {
                 state = DONE;
                 currentToken = ENDFILE;
-            } else if (c == '*') {
+            }
+            else if (c == '*')
+            {
                 state = INCOMMENT3;
             }
-            break;
+            break; // { .. } -> /* ... */
         case INCOMMENT3:
             save = FALSE;
-            if (c == '/') {
+            if (c == '/')
+            {
                 // fprintf(listing, "annotation over");
                 state = START;
-            } else {
-                ungetNextChar();
-                currentToken = ERROR;
             }
-            break;
-        case INASSIGN:
-            state = DONE;
-            if (c == '=')
-                currentToken = ASSIGN;
-            else // : 后读取到的不是 = , 则返回 ERROR
-            { /* backup in the input */
-                ungetNextChar(); // 回退
-                save = FALSE;
+            else
+            {
+                ungetNextChar();
                 currentToken = ERROR;
             }
             break;
         case INNUM:
             if (!isdigit(c)) // 读取到不是数字的字符后结束读取
-            { /* backup in the input */
+            {                /* backup in the input */
                 ungetNextChar();
                 save = FALSE;
                 state = DONE;
@@ -226,7 +314,7 @@ TokenType getToken(void)
             break;
         case INID:
             if (!isalpha(c)) // 读取到不是字母的字符后结束读取
-            { /* backup in the input */
+            {                /* backup in the input */
                 ungetNextChar();
                 save = FALSE;
                 state = DONE;
@@ -246,13 +334,14 @@ TokenType getToken(void)
         if (state == DONE)
         {
             tokenString[tokenStringIndex] = '\0';
-            if (currentToken == ID)
+            if (currentToken == ID) // 检查读取到的 token 是否是保留字
                 currentToken = reservedLookup(tokenString);
         }
     }
     if (TraceScan)
     {
         fprintf(listing, "\t%d: ", lineno);
+        
         printToken(currentToken, tokenString);
     }
     // fprintf(listing, "get token: %s", currentToken);

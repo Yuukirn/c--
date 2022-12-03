@@ -9,6 +9,16 @@
 #include "globals.h"
 #include "util.h"
 
+int if_debug = TRUE;
+
+void debug(const char *__restrict__ __format, ...)
+{
+    if (if_debug)
+    {
+        printf(__format);
+    }
+}
+
 /* Procedure printToken prints a token
  * and its lexeme to the listing file
  */
@@ -17,24 +27,36 @@ void printToken(TokenType token, const char *tokenString)
     switch (token)
     {
     case IF:
-    case THEN:
+    case WHILE:
     case ELSE:
-    case END:
-    case REPEAT:
-    case UNTIL:
+    case INT:
+    case RETURN:
+    case VOID:
     case READ:
     case WRITE:
         fprintf(listing,
                 "reserved word: %s\n", tokenString);
         break;
     case ASSIGN:
-        fprintf(listing, ":=\n");
+        fprintf(listing, "=\n");
         break;
     case LT:
         fprintf(listing, "<\n");
         break;
+    case LE:
+        fprintf(listing, "<=\n");
+        break;
+    case RT:
+        fprintf(listing, ">\n");
+        break;
+    case RE:
+        fprintf(listing, ">=\n");
+        break;
     case EQ:
-        fprintf(listing, "=\n");
+        fprintf(listing, "==\n");
+        break;
+    case NE:
+        fprintf(listing, "!=\n");
         break;
     case LPAREN:
         fprintf(listing, "(\n");
@@ -44,6 +66,9 @@ void printToken(TokenType token, const char *tokenString)
         break;
     case SEMI:
         fprintf(listing, ";\n");
+        break;
+    case COMMA:
+        fprintf(listing, ",\n");
         break;
     case PLUS:
         fprintf(listing, "+\n");

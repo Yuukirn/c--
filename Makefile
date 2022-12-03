@@ -13,6 +13,10 @@ OBJS = main.o util.o scan.o parse.o symtab.o analyze.o code.o cgen.o
 tiny: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o tiny
 
+SCAN_OBJS = main.o util.o scan.o
+tiny_only_scan: $(SCAN_OBJS)
+	$(CC) $(CFLAGS) $(SCAN_OBJS) -o tiny_only_scan
+
 main.o: main.c globals.h util.h scan.h parse.h analyze.h cgen.h
 	$(CC) $(CFLAGS) -c main.c
 

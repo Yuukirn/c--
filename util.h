@@ -8,6 +8,8 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
+void debug(const char *__restrict__ __format, ...);
+
 /* Procedure printToken prints a token 
  * and its lexeme to the listing file
  */

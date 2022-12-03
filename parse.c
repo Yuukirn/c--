@@ -25,6 +25,40 @@ static TreeNode *simple_exp(void);
 static TreeNode *term(void);
 static TreeNode *factor(void);
 
+// 1. program -> declaration-list
+// 2. declaration-list -> declaration-list declaration | declaration
+// 3. declaration -> var-declaration | fun-declaration
+// 4. var-declaration -> `type-specifier` ID; | `type-specifier` ID [ NUM ]; // 变量声明  后面的是数组，可不实现
+// 5. `type-specifier` -> int | void
+// 6. fun-declaration -> `type-specifier` ID ( params ) compound-stmt // 函数声明  compound-stmt 是函数体
+// 7. params -> param-list | void
+// 8. param-list -> param-list, param | param // 左递归
+// 9. param -> `type-specifier` ID | `type-specifier` ID [ ] // 数组可省略
+// 10. compound-stmt -> { local-declarations statement-list } // 函数体
+// 11. local-declarations -> local-declarations var-declaration | empty
+// 12. statement-list -> statement-list statement | empty       // 和 local-declarations 一样，左递归，可以为空
+// 13. statement -> expression-stmt | compound-stmt | selection-stmt | iteration-stmt | return-stmt
+// 14. expression-stmt -> expression; | ;   // 表达式语句用于赋值和函数调用
+// 15. selection-stmt -> `if` ( expression ) statement
+//                     | `if` ( expression ) statement `else` statement
+// 16. iteration-stmt -> `while` ( expression ) statement
+// 17. return-stmt -> `return` ; | `return` expression;
+// 18. expression -> var = expression | simple-expression
+// 19. var -> ID | ID [ expression ] // 后一项可舍弃
+// 20. simple-expression -> additive-expression relop additive-expression // 简单表达式由无结合的关系操作符组成
+//                        | additive-expression
+// 21. relop -> <= | < | > | >= | == | != 
+// 22. additive-expression -> additive-expression addop term | term
+// 23. addop -> + | -
+// 24. term -> term mulop factor | factor
+// 25. mulop -> * | /
+// 26. factor -> ( expression ) | var | call | NUM // factor 是围在括号内的表达式；或一个变量，求出其变量的值；或者一个函数调用，求出函数的返回值；或者一个 NUM，其值由扫描器计算
+// 27. call -> ID ( args ) // 函数调用，ID 是函数名，参数为空或以逗号分隔的表达式组成
+// 28. args -> arg-list | empty
+// 29. arg-list -> arg-list, expression | expression // 左递归
+
+static TreeNode *declaration_list();
+
 static void syntaxError(char *message)
 {
     fprintf(listing, "\n>>> ");
@@ -80,7 +114,7 @@ TreeNode *statement(void)
     {
     case IF:
         t = if_stmt();
-        break;
+//         break;
     case REPEAT:
         t = repeat_stmt();
         break;

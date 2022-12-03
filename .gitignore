@@ -3,6 +3,7 @@ tiny
 tm
 tiny_*
 tm_*
-sample*
+*.tny
+*.tm
 build/
 
