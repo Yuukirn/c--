@@ -17,6 +17,10 @@ SCAN_OBJS = main.o util.o scan.o
 tiny_only_scan: $(SCAN_OBJS)
 	$(CC) $(CFLAGS) $(SCAN_OBJS) -o tiny_only_scan
 
+PARSE_OBJS = main.o util.o scan.o parse.o
+tiny_only_parse: $(PARSE_OBJS)
+	$(CC) $(CFLAGS) $(PARSE_OBJS) -o tiny_only_parse
+
 main.o: main.c globals.h util.h scan.h parse.h analyze.h cgen.h
 	$(CC) $(CFLAGS) -c main.c
 

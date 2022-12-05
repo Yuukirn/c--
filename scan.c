@@ -83,7 +83,7 @@ static struct
 {
     char *str;
     TokenType tok;
-} reservedWords[MAXRESERVED] = {{"if", IF}, {"int", INT}, {"else", ELSE}, {"void", VOID}, {"while", WHILE}, {"return", RETURN}, {"read", READ}, {"write", WRITE}};
+} reservedWords[MAXRESERVED] = {{"if", IF}, {"else", ELSE},{"int", INT},  {"void", VOID}, {"while", WHILE}, {"return", RETURN},};
 
 /* lookup an identifier to see if it is a reserved word */
 /* uses linear search */

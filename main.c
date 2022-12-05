@@ -8,9 +8,9 @@
 #include "globals.h"
 
 /* set NO_PARSE to TRUE to get a scanner-only compiler */
-#define NO_PARSE TRUE
+#define NO_PARSE FALSE
 /* set NO_ANALYZE to TRUE to get a parser-only compiler */
-#define NO_ANALYZE FALSE
+#define NO_ANALYZE TRUE
 
 /* set NO_CODE to TRUE to get a compiler that does not
  * generate code
@@ -18,10 +18,13 @@
 #define NO_CODE FALSE
 
 #include "util.h"
+
 #if NO_PARSE
 #include "scan.h"
 #else
+
 #include "parse.h"
+
 #if !NO_ANALYZE
 #include "analyze.h"
 #if !NO_CODE
@@ -37,7 +40,7 @@ FILE *listing; // stdout
 FILE *code; // *.tm
 
 /* allocate and set tracing flags */
-int EchoSource = FALSE;
+int EchoSource = TRUE;
 int TraceScan = TRUE;
 int TraceParse = TRUE;
 int TraceAnalyze = TRUE;
@@ -45,12 +48,10 @@ int TraceCode = TRUE;
 
 int Error = FALSE;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     TreeNode *syntaxTree;
     char pgm[120]; /* source code file name */
-    if (argc != 2)
-    {
+    if (argc != 2) {
         fprintf(stderr, "usage: %s <filename>\n", argv[0]);
         exit(1);
     }
@@ -58,8 +59,7 @@ int main(int argc, char *argv[])
     if (strchr(pgm, '.') == NULL) // 添加后缀
         strcat(pgm, ".tny");
     source = fopen(pgm, "r");
-    if (source == NULL)
-    {
+    if (source == NULL) {
         fprintf(stderr, "File %s not found\n", pgm);
         exit(1);
     }
@@ -67,11 +67,9 @@ int main(int argc, char *argv[])
     fprintf(listing, "\nTINY COMPILATION: %s\n", pgm);
 #if NO_PARSE
     while (getToken() != ENDFILE)
-        ;
 #else
     syntaxTree = parse(); // 解析得到语法树
-    if (TraceParse)
-    {
+    if (TraceParse) {
         fprintf(listing, "\nSyntax tree:\n");
         printTree(syntaxTree);
     }

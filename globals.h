@@ -38,8 +38,6 @@ typedef enum
     VOID,
     WHILE,
     RETURN,
-    READ,
-    WRITE,
     /* multicharacter tokens */
     ID,
     NUM,
@@ -77,37 +75,35 @@ extern int lineno; /* source line number for listing */
 /***********   Syntax tree for parsing ************/
 /**************************************************/
 
-typedef enum
-{
+typedef enum {
     StmtK, // 语句
     ExpK // 表达式
 } NodeKind; // 构建语法树时标识类型
 
 // TODO:
-typedef enum
-{
+typedef enum {
     SelectionK,
     WhileK,
-    ExpressionK,
+    AssignK,
     ReturnK,
     CompoundK,
     VarDeclarationK,
     FuncDeclarationK,
-    ParamK,
 } StmtKind; // 语句类型
 
 // TODO:
 // 用于表达式类型检查
-typedef enum
-{
-    OpK,
-    ConstK,
-    IdK
+typedef enum {
+    OpK, // operation 比较或运算
+    ConstK, // 常量数值
+    IdK, // 标识符
+    ParamK,
+    CallK, // 函数调用
+//    AssignK, // var = expression
 } ExpKind;
 
 /* ExpType is used for type checking */
-typedef enum
-{
+typedef enum {
     Void,
     Integer,
     Boolean
@@ -115,19 +111,16 @@ typedef enum
 
 #define MAXCHILDREN 3
 
-typedef struct treeNode
-{
+typedef struct treeNode {
     struct treeNode *child[MAXCHILDREN];
     struct treeNode *sibling; // 连接同一层次的节点的链表
     int lineno;
     NodeKind nodekind;
-    union
-    {
+    union {
         StmtKind stmt; // nodekind -> StmtK
         ExpKind exp; // nodekind -> ExpK
     } kind;
-    union
-    {
+    union {
         TokenType op;
         int val;
         char *name;

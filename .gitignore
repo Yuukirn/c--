@@ -6,4 +6,4 @@ tm_*
 *.tny
 *.tm
 build/
-
+.idea/
