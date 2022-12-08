@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     listing = stdout; /* send listing to screen */
     fprintf(listing, "\nTINY COMPILATION: %s\n", pgm);
 #if NO_PARSE
-    while (getToken() != ENDFILE)
+    while (getToken() != ENDFILE);
 #else
     syntaxTree = parse(); // 解析得到语法树
     if (TraceParse) {

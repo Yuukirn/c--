@@ -6,7 +6,7 @@
 
 CC = gcc
 
-CFLAGS = 
+CFLAGS =
 
 OBJS = main.o util.o scan.o parse.o symtab.o analyze.o code.o cgen.o
 
@@ -19,10 +19,10 @@ tiny_only_scan: $(SCAN_OBJS)
 
 PARSE_OBJS = main.o util.o scan.o parse.o
 tiny_only_parse: $(PARSE_OBJS)
-	$(CC) $(CFLAGS) $(PARSE_OBJS) -o tiny_only_parse
+	$(CC) $(CFLAGS) $(PARSE_OBJS) -o tiny_only_parse 
 
 main.o: main.c globals.h util.h scan.h parse.h analyze.h cgen.h
-	$(CC) $(CFLAGS) -c main.c
+	$(CC) $(CFLAGS) -c main.c 
 
 util.o: util.c util.h globals.h
 	$(CC) $(CFLAGS) -c util.c
