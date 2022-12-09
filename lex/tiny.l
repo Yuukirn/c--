@@ -23,16 +23,18 @@ whitespace  [ \t]+
 %%
 
 "if"            {return IF;}
-"then"          {return THEN;}
 "else"          {return ELSE;}
-"end"           {return END;}
-"repeat"        {return REPEAT;}
-"until"         {return UNTIL;}
-"read"          {return READ;}
-"write"         {return WRITE;}
-":="            {return ASSIGN;}
-"="             {return EQ;}
+"int"           {return INT;}
+"void"          {return VOID;}
+"while"         {return WHILE;}
+"return"        {return RETURN;}
+"="             {return ASSIGN;}
+"=="            {return EQ;}
+"!="            {return NE;}
 "<"             {return LT;}
+"<="            {return LE;}
+">"             {return RT;}
+">="            {return RE;}
 "+"             {return PLUS;}
 "-"             {return MINUS;}
 "*"             {return TIMES;}
@@ -40,16 +42,23 @@ whitespace  [ \t]+
 "("             {return LPAREN;}
 ")"             {return RPAREN;}
 ";"             {return SEMI;}
+","             {return COMMA;}
+"{"             {return LBRACE;}
+"}"             {return RBRACE;}
 {number}        {return NUM;}
 {identifier}    {return ID;}
 {newline}       {lineno++;}
 {whitespace}    {/* skip whitespace */}
-"{"             { char c;
-                  do
-                  { c = input();
+"/*"            {
+                  char c;
+                  while (c != EOF && ((c = input()) != '/')) {
                     if (c == EOF) break;
                     if (c == '\n') lineno++;
-                  } while (c != '}');
+                    while (c != EOF && ((c = input()) != '*')) {
+                      if (c == EOF) break;
+                      if (c == '\n') lineno++;
+                    };
+                  }
                 }
 .               {return ERROR;}
 

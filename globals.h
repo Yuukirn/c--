@@ -43,8 +43,8 @@ typedef enum
     NUM,
     /* special symbols */
     // 特殊符号
-    ASSIGN, // := -> =
-    EQ, // = -> ==
+    ASSIGN, // =
+    EQ, // ==
     NE, // !=
     LT, // <
     LE, // <=
@@ -60,8 +60,6 @@ typedef enum
     COMMA, // ,
     LBRACE, // {
     RBRACE, // }
-    LANNO, // /* // 这俩先保留
-    RANNO, // */
 } TokenType;
 
 extern FILE *source;  /* source code text file */

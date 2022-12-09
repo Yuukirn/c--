@@ -117,6 +117,7 @@ static void match(TokenType expected)
         fprintf(listing, "\texpected token -> ");
         printToken(expected, tokenString);
         fprintf(listing, "      ");
+        exit(1);
     }
 }
 
@@ -176,18 +177,17 @@ TreeNode *declaration()
     { // func-declaration
         t->kind.stmt = FuncDeclarationK;
         match(LPAREN);
-        if (token == VOID)
+        if (token == VOID || token == RPAREN)
         {
             t->child[0] = newExpNode(ParamK);
             t->child[0]->type = Void;
-            match(VOID);
+            match(token);
         }
         else
         {
             t->child[0] = param_list();
+            match(RPAREN);
         }
-        // t->child[0] = params(); // TODO
-        match(RPAREN);
         t->child[1] = compound_stmt();
     }
     return t;
@@ -198,14 +198,14 @@ TreeNode *param_list()
 {
     TreeNode *t = param();
     TreeNode *p = t;
-    while (token != ')')
+    while (token != RPAREN)
     { // 读取到 ) 说明到了 ( params ) 的尾
         match(COMMA);
         TreeNode *q;
         q = param();
         if (q != NULL)
         {
-            if (t != NULL)
+            if (t == NULL)
             {
                 t = p = q;
             }
@@ -233,6 +233,7 @@ TreeNode *param()
     }
     match(token);
     t->attr.name = copyString(tokenString);
+    match(ID);
     return t;
 }
 
@@ -650,7 +651,7 @@ TreeNode *arg_list()
         q = simple_expression();
         if (q != NULL)
         {
-            if (t != NULL)
+            if (t == NULL)
             {
                 t = p = q;
             }

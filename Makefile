@@ -17,9 +17,16 @@ SCAN_OBJS = main.o util.o scan.o
 tiny_only_scan: $(SCAN_OBJS)
 	$(CC) $(CFLAGS) $(SCAN_OBJS) -o tiny_only_scan
 
+LEX_OBJS = main.o util.o lex.yy.o
+tiny_scan_by_lex: $(LEX_OBJS)
+	$(CC) $(CFLAGS) $(LEX_OBJS) -lfl -o tiny_scan_by_lex
+
 PARSE_OBJS = main.o util.o scan.o parse.o
 tiny_only_parse: $(PARSE_OBJS)
 	$(CC) $(CFLAGS) $(PARSE_OBJS) -o tiny_only_parse 
+
+lex.yy.o: lex.yy.c globals.h
+	$(CC) $(CFLAGS) -c lex.yy.c
 
 main.o: main.c globals.h util.h scan.h parse.h analyze.h cgen.h
 	$(CC) $(CFLAGS) -c main.c 

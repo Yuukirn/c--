@@ -1,11 +1,11 @@
 *.o
-tiny
-tm
-tiny_*
-tm_*
+tiny*
+tm*
 *.tny
 *.tm
 build/
 .idea/
 core*
 log*
+lex/lex.yy.c
+lex.yy.c
