@@ -338,9 +338,6 @@ void printTree(TreeNode *tree)
         {
             if (tree->child[i] != NULL)
             {
-                // if (tree->kind.stmt == CompoundK) {
-                //     debug("i: %d\n", i);
-                // }
                 printTree(tree->child[i]);
             }
         }

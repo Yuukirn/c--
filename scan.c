@@ -14,8 +14,8 @@ typedef enum
 {
     START,
     INASSIGN, // START + : -> INASSIGN
-    // 改成 START + "/" -> INCOMMENT1 + "*" -> INCOMMENT2 + "*" -> INCOMMENT3 + "/" -> INCOMMENT4
-    INCOMMENT1, // START + { -> INCOMMENT + } -> START
+    //  START + "/" -> INCOMMENT1 + "*" -> INCOMMENT2 + "*" -> INCOMMENT3 + "/" ->
+    INCOMMENT1,
     INCOMMENT2,
     INCOMMENT3,
     INLE,
@@ -24,7 +24,6 @@ typedef enum
     INEQ,
     INNUM, // START + digit -> INNUM
     INID,  // START + letter -> INID
-    INBLOCK,
     DONE
 } StateType;
 
@@ -70,7 +69,7 @@ static int getNextChar(void)
 
 /* ungetNextChar backtracks one character
    in lineBuf */
-// 会退一个位置
+// 回退一个位置
 static void ungetNextChar(void)
 {
     if (!EOF_flag)
@@ -164,15 +163,6 @@ TokenType getToken(void)
                     save = FALSE;
                     currentToken = ENDFILE;
                     break;
-                case '=':
-                    currentToken = ASSIGN; //
-                    break;
-                case '<':
-                    currentToken = LT;
-                    break;
-                case '>':
-                    currentToken = RT;
-                    break;
                 case '+':
                     currentToken = PLUS;
                     break;
@@ -181,9 +171,6 @@ TokenType getToken(void)
                     break;
                 case '*':
                     currentToken = TIMES;
-                    break;
-                case '/':
-                    currentToken = OVER;
                     break;
                 case '(':
                     currentToken = LPAREN;
@@ -329,7 +316,6 @@ TokenType getToken(void)
             break;
         }
         if ((save) && (tokenStringIndex <= MAXTOKENLEN))
-            // fprintf(listing, "save: %c\n", c);
             tokenString[tokenStringIndex++] = (char)c;
         if (state == DONE)
         {
@@ -344,6 +330,5 @@ TokenType getToken(void)
         
         printToken(currentToken, tokenString);
     }
-    // fprintf(listing, "get token: %s", currentToken);
     return currentToken;
 } /* end getToken */

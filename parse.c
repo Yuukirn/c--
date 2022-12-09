@@ -13,47 +13,6 @@
 
 static TokenType token; /* holds current token */
 
-// 1. program -> declaration-list
-// 2. declaration-list -> declaration-list declaration | declaration
-// 3. declaration -> var-declaration | fun-declaration
-
-// decl -> stmt
-// param -> stmt
-// 4. var-declaration -> `type-specifier` ID; // 变量声明 后面的是数组，可不实现
-// 5. `type-specifier` -> int | void
-// 6. fun-declaration -> `type-specifier` ID ( params ) compound-stmt //
-// 函数声明  compound-stmt 是函数体
-// 7. params -> param-list | void
-// 8. param-list -> param-list, param | param // 左递归
-// 9. param -> `type-specifier` ID
-// 10. compound-stmt -> { local-declarations statement-list } // 复合语句 //
-// 11. local-declarations -> local-declarations var-declaration | empty
-// 12. statement-list -> statement-list statement | empty
-// 13. statement -> assign-stmt | compound-stmt | selection-stmt |
-// iteration-stmt | return-stmt
-// 14. assign-stmt -> var = expression; | ;   // 表达式语句用于赋值和函数调用
-// 15. selection-stmt -> `if` ( expression ) statement
-//                     | `if` ( expression ) statement `else` statement
-// 16. iteration-stmt -> `while` ( expression ) statement
-// 17. return-stmt -> `return` ; | `return` expression;
-// 18. expression -> simple-expression
-// 19. var -> ID | ID [ expression ] // 后一项可舍弃
-// 20. simple-expression -> additive-expression relop additive-expression //
-// 简单表达式由无结合的关系操作符组成
-//                        | additive-expression
-// 21. relop -> <= | < | > | >= | == | !=
-// 22. additive-expression -> additive-expression addop term | term
-// 23. addop -> + | -
-// 24. term -> term mulop factor | factor
-// 25. mulop -> * | /
-// 26. factor -> ( expression ) | var | call | NUM // factor
-// 是围在括号内的表达式；或一个变量，求出其变量的值；或者一个函数调用，求出函数的返回值；或者一个
-// NUM，其值由扫描器计算
-// 27. call -> ID ( args ) // 函数调用，ID
-// 是函数名，参数为空或以逗号分隔的表达式组成
-// 28. args -> arg-list | empty
-// 29. arg-list -> arg-list, expression | expression // 左递归
-
 static TreeNode *declaration_list();
 
 static TreeNode *declaration();
@@ -111,17 +70,15 @@ static void match(TokenType expected)
         token = getToken();
     else
     {
-        // debug("token = %d, expected: %d", token, expected);
         syntaxError("unexpected token -> ");
         printToken(token, tokenString);
         fprintf(listing, "\texpected token -> ");
         printToken(expected, tokenString);
         fprintf(listing, "      ");
-        exit(1);
     }
 }
 
-// program -> declaration_list 程序由一堆声明组成
+// program -> declaration_list
 // declaration_list -> declaration_list declaration | declaration
 TreeNode *declaration_list()
 {
@@ -240,11 +197,10 @@ TreeNode *param()
 // statement_list -> statement_list statement | empty
 TreeNode *statement_list()
 {
-    // TODO: 暂不支持 empty
     TreeNode *t = statement();
     TreeNode *p = t;
     while (token != RBRACE)
-    { // statement_list 只用在 compound-stmt 中
+    {
         TreeNode *q = statement();
         if (q != NULL)
         {
@@ -344,7 +300,7 @@ TreeNode *iteration_stmt()
     return t;
 }
 
-// 15. selection-stmt -> `if` ( expression ) statement
+// selection-stmt -> `if` ( expression ) statement
 //                     | `if` ( expression ) statement `else` statement
 TreeNode *selection_stmt()
 {
@@ -404,7 +360,7 @@ TreeNode *return_stmt()
 // local_declaration -> local-declarations var-declaration | empty
 // var-declaration -> `type-specifier` ID;
 TreeNode *local_declarations()
-{ // TODO:
+{
     TreeNode *t = NULL;
     TreeNode *p = t;
     debug("local declaration\n");
@@ -412,11 +368,9 @@ TreeNode *local_declarations()
     { // empty
         return t;
     }
-    // int i = 0;
     while (token == INT || token == VOID)
     {
         // debug("i: %d\n", i++);
-        // 建立节点
         TreeNode *q = newStmtNode(VarDeclarationK);
         if (token == INT) {
             q->type = Integer;
@@ -442,37 +396,8 @@ TreeNode *local_declarations()
             p = q;
         }
     }
-    // debug("out! \t");
-    // printToken(token, tokenString);
     return t;
 }
-
-// expression -> simple-expression
-// simple-expression -> additive-expression relop additive-expression
-//                    | additive-expression
-// ID | ( expression ), ID, NUM
-// TreeNode *expression() {
-//    // TODO
-//    TreeNode *t = NULL;
-//    switch (token) {
-//        case LPAREN:
-//        case NUM: { // simple-expression
-//            t = simple_expression();
-//        }
-//        case ID: {
-//            char *id = copyString(tokenString);
-//            match(ID);
-//            if (token == '=') { // var = expression
-//                // TODO: !!! 这里逻辑有问题，再想想如何分辨两种情况 添加 assign_expression -> var = expression ?
-//                t = newExpNode(AssignK);
-//                t->attr.name = copyString(id);
-//            } else { // TODO: 其他ID开头的
-//
-//            }
-//        }
-//    }
-//    return t;
-//}
 
 // expression -> var = expression | simple-expression
 TreeNode *expression() {
@@ -675,8 +600,8 @@ TreeNode *parse(void)
 {
     TreeNode *t;
     token = getToken();
-    // program -> stmt_sequence
-    t = declaration_list(); // TODO:
+    // program -> declaration_list
+    t = declaration_list();
     if (token != ENDFILE)
         syntaxError("Code ends before file\n");
     return t;
