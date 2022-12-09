@@ -78,7 +78,6 @@ typedef enum {
     ExpK // 表达式
 } NodeKind; // 构建语法树时标识类型
 
-// TODO:
 typedef enum {
     SelectionK,
     WhileK,
@@ -89,8 +88,6 @@ typedef enum {
     FuncDeclarationK,
 } StmtKind; // 语句类型
 
-// TODO:
-// 用于表达式类型检查
 typedef enum {
     OpK, // operation 比较或运算
     ConstK, // 常量数值

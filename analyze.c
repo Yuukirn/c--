@@ -62,16 +62,24 @@ static void insertNode(TreeNode *t)
         switch (t->kind.stmt)
         {
         case AssignK:
-        case ReadK:
-            // 在符号表中查找是否有名为 attr.name 的变量
-            if (st_lookup(t->attr.name) == -1)
-                // 若没有，则认为是新变量
-                /* not yet in table, so treat as new definition */
-                st_insert(t->attr.name, t->lineno, location++);
-            else
-                /* already in table, so ignore location,
+        case VarDeclarationK:
+            if (st_lookup(t->attr.name) == -1) {
+            /* not yet in table, so treat as new definition */
+                st_insert(t->attr.name, t->lineno, location++, VAR);
+            } else {
+            /* already in table, so ignore location,
                    add line number of use only */
-                st_insert(t->attr.name, t->lineno, 0);
+                st_insert(t->attr.name, t->lineno, 0, VAR);
+            }
+            break;
+        case FuncDeclarationK:
+            if (st_lookup(t->attr.name) == -1) {
+                st_insert(t->attr.name, t->lineno, location++, FUNC);
+            } else {
+                st_insert(t->attr.name, t->lineno, 0, FUNC);
+            }
+            break;
+        case ReturnK:
             break;
         default:
             break;
@@ -81,13 +89,22 @@ static void insertNode(TreeNode *t)
         switch (t->kind.exp)
         {
         case IdK:
-            if (st_lookup(t->attr.name) == -1)
+            if (st_lookup(t->attr.name) == -1) {
                 /* not yet in table, so treat as new definition */
-                st_insert(t->attr.name, t->lineno, location++);
-            else
+                st_insert(t->attr.name, t->lineno, location++, VAR);
+                }
+            else {
                 /* already in table, so ignore location,
                    add line number of use only */
-                st_insert(t->attr.name, t->lineno, 0);
+                st_insert(t->attr.name, t->lineno, 0, VAR);
+                }
+            break;
+        case CallK:
+            if (st_lookup(t->attr.name) == -1) {
+                st_insert(t->attr.name, t->lineno, location++, FUNC);
+            } else {
+                st_insert(t->attr.name, t->lineno, 0, FUNC);
+            }
             break;
         default:
             break;
@@ -128,17 +145,17 @@ static void checkNode(TreeNode *t)
     case ExpK:
         switch (t->kind.exp)
         {
-        case OpK: // 运算符，两边都必须是整数
+        case OpK: // 运算符，两边都必须是 int（包括 id）
             if ((t->child[0]->type != Integer) ||
                 (t->child[1]->type != Integer))
                 typeError(t, "Op applied to non-integer");
             if ((t->attr.op == EQ) || (t->attr.op == LT))
-                t->type = Boolean; // 比较运算符，此时父节点的类型是比较的结果
+                t->type = Boolean;
             else
                 t->type = Integer;
             break;
         case ConstK:
-        case IdK: // TODO
+        case IdK: // id 视为 int，便于检查
             t->type = Integer;
             break;
         default:
@@ -148,21 +165,17 @@ static void checkNode(TreeNode *t)
     case StmtK:
         switch (t->kind.stmt)
         {
-        case IfK:
+        case SelectionK:
             if (t->child[0]->type == Integer)
                 typeError(t->child[0], "if test is not Boolean");
             break;
         case AssignK:
-            if (t->child[0]->type != Integer)
-                typeError(t->child[0], "assignment of non-integer value");
+            if (t->child[0]->type != Integer && t->child[0]->kind.stmt != CallK)
+                typeError(t->child[0], "assignment of non-integer or non-call value");
             break;
-        case WriteK:
-            if (t->child[0]->type != Integer)
-                typeError(t->child[0], "write of non-integer value");
-            break;
-        case RepeatK:
-            if (t->child[1]->type == Integer)
-                typeError(t->child[1], "repeat test is not Boolean");
+        case WhileK:
+            if (t->child[0]->type == Integer)
+                typeError(t->child[1], "while test is not Boolean");
             break;
         default:
             break;

@@ -9,12 +9,17 @@
 #ifndef _SYMTAB_H_
 #define _SYMTAB_H_
 
+typedef enum {
+    VAR,
+    FUNC,
+} BucketType;
+
 /* Procedure st_insert inserts line numbers and
  * memory locations into the symbol table
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
-void st_insert( char * name, int lineno, int loc );
+void st_insert( char * name, int lineno, int loc, BucketType type);
 
 /* Function st_lookup returns the memory 
  * location of a variable or -1 if not found
